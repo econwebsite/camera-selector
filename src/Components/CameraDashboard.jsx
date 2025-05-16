@@ -6,13 +6,16 @@ import {
   Typography,
   Checkbox,
   FormControlLabel,
-  Collapse
+  Collapse,
+  Modal,
+  Box,
+  Tooltip
 } from '@mui/material';
-import { Sensors } from '@mui/icons-material';
 
-import { ArrowUpward } from '@mui/icons-material';
-import CameraDetailCard from './Datacomp/Datacomp';
 import {
+  Sensors,
+  ArrowUpward,
+  Fullscreen    ,
   FilterList,
   Settings,
   Speed,
@@ -20,19 +23,22 @@ import {
   Memory,
   Lens,
   HighQuality,
-  Cable,
+  Cable
 } from '@mui/icons-material';
 
+import CameraDetailCard from './Datacomp/Datacomp';
 import './CameraDashboard.css';
+import ModalFilter from "./Modalfilters/ModalFilter"
+
 const filterOptions = [
   {
     title: "Resolution",
-    icon: <HighQuality fontSize="small" />, 
+    icon: <HighQuality fontSize="small" />,
     options: ["720p", "1080p", "4K", "8K"]
   },
   {
     title: "Interface",
-    icon: <Cable fontSize="small" />, 
+    icon: <Cable fontSize="small" />,
     options: ["USB 2.0", "USB 3.0", "HDMI", "Ethernet"]
   },
   {
@@ -52,11 +58,10 @@ const filterOptions = [
   },
   {
     title: "Sensor",
-    icon: <Sensors fontSize="small" />, 
+    icon: <Sensors fontSize="small" />,
     options: ["Sony IMX334", "Omnivision OV9732", "Sony IMX327"]
   }
 ];
-
 
 const CameraDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,6 +69,7 @@ const CameraDashboard = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [openFilter, setOpenFilter] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [openModal, setOpenModal] = useState(false);
 
   const handleSearch = () => {
     const term = searchTerm.trim().toLowerCase();
@@ -109,7 +115,7 @@ const CameraDashboard = () => {
         <div className="sidebar-header">
           <Typography variant="h6" className="sidebar-title">Context</Typography>
         </div>
-        
+
         <div className='Total-history'>
           <div className="history-list">
             {searchHistory.map((item, idx) => (
@@ -129,47 +135,53 @@ const CameraDashboard = () => {
 
         {/* Filter Section */}
         <div className="filter-section">
-  <div className="filter-header">
-    <FilterList fontSize="small" />
-    <Typography variant="subtitle1" className="filter-title">
-      Filters
-    </Typography>
-  </div>
+       <div className="filter-header">
+  <FilterList fontSize="small" />
+  <Typography variant="subtitle1" className="filter-title">
+    Filters
+  </Typography>
+  <Tooltip title="Expand" arrow>
+  <IconButton className="expand-icon-button" onClick={() => setOpenModal(true)} size="small">
+    <Fullscreen     />
 
-  <div className="filter-content">
-    {filterOptions.map((filter) => (
-      <div key={filter.title} className="filter-group">
-        <div className="filter-group-header" onClick={() => handleFilterToggle(filter.title)}>
-          {filter.icon}
-          <Typography variant="body2" className="filter-group-title">
-            {filter.title}
-          </Typography>
-        </div>
-
-        <Collapse in={openFilter === filter.title}>
-          <div className="filter-options">
-            {filter.options.map((option) => (
-              <FormControlLabel
-                key={option}
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={selectedFilters[filter.title]?.includes(option) || false}
-                    onChange={() => handleFilterChange(filter.title, option)}
-                    color="primary"
-                  />
-                }
-                label={option}
-                className="filter-option"
-              />
-            ))}
-          </div>
-        </Collapse>
-      </div>
-    ))}
-  </div>
+  </IconButton>
+  </Tooltip>
 </div>
 
+
+          <div className="filter-content">
+            {filterOptions.map((filter) => (
+              <div key={filter.title} className="filter-group">
+                <div className="filter-group-header" onClick={() => handleFilterToggle(filter.title)}>
+                  {filter.icon}
+                  <Typography variant="body2" className="filter-group-title">
+                    {filter.title}
+                  </Typography>
+                </div>
+
+                <Collapse in={openFilter === filter.title}>
+                  <div className="filter-options">
+                    {filter.options.map((option) => (
+                      <FormControlLabel
+                        key={option}
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={selectedFilters[filter.title]?.includes(option) || false}
+                            onChange={() => handleFilterChange(filter.title, option)}
+                            color="primary"
+                          />
+                        }
+                        label={option}
+                        className="filter-option"
+                      />
+                    ))}
+                  </div>
+                </Collapse>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -182,32 +194,31 @@ const CameraDashboard = () => {
         </div>
 
         {/* Bottom Search Bar */}
-        <div className="bottom-search-container">
-          <div className="search-wrapper">
+        <div className="bottom-search-container-enhanced">
+          <div className="search-bar-enhanced">
             <TextField
               fullWidth
               variant="outlined"
-              size="small"
+              size="medium"
               placeholder="Search camera types..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               InputProps={{
-                className: 'search-input',
+                className: 'search-input-enhanced',
                 endAdornment: (
                   <IconButton
                     onClick={handleSearch}
-                    className="search-button"
-                    disableRipple
+                    className="search-button-enhanced"
                   >
-                    <ArrowUpward className="arrow-icon" />
+                    <ArrowUpward />
                   </IconButton>
                 ),
               }}
             />
             <Button
               variant="contained"
-              className="new-search-button"
+              className="new-search-button-enhanced"
               onClick={handleNewSearch}
             >
               New Search
@@ -215,6 +226,14 @@ const CameraDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for Filters */}
+     <ModalFilter
+  isOpen={openModal}
+  onClose={() => setOpenModal(false)}
+  selectedFilters={selectedFilters}
+  handleFilterChange={handleFilterChange}
+/>
     </div>
   );
 };
